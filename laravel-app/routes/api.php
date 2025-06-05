@@ -1,8 +1,10 @@
 <?php
 
-use App\Http\Controllers\PortfolioImportController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Portfolio Import API
-Route::post('/portfolio/import/{username}', [PortfolioImportController::class, 'import']);
+// User Portfolio API
+Route::get('/users/{username}', [UserController::class, 'show']);
+Route::patch('/users/{username}', [UserController::class, 'update']);
+Route::delete('/users/{username}', [UserController::class, 'destroy']);

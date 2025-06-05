@@ -169,20 +169,10 @@ class PortfolioImportService
                 'user_id' => $user->id,
                 'name' => $clientData->name,
                 'introduction' => $clientData->introduction,
+                'photo_url' => $clientData->photoUrl,
                 'job_title' => $clientData->jobTitle,
                 'feedback' => $clientData->feedback,
             ]);
-
-            // Save client image if available
-            if ($clientData->imageUrl) {
-                ClientMedia::create([
-                    'client_id' => $client->id,
-                    'url' => $clientData->imageUrl,
-                ]);
-
-                // Load the media relationship for the response
-                $client->load('media');
-            }
 
             $savedClients[] = $client;
         }

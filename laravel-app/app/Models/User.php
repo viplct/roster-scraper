@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -53,5 +55,29 @@ class User extends Authenticatable
             'password' => 'hashed',
             'social_urls' => 'array',
         ];
+    }
+
+    /**
+     * Get the works for the user.
+     */
+    public function works(): HasMany
+    {
+        return $this->hasMany(Work::class);
+    }
+
+    /**
+     * Get the clients for the user.
+     */
+    public function clients(): HasMany
+    {
+        return $this->hasMany(Client::class);
+    }
+
+    /**
+     * Get all client media through clients.
+     */
+    public function clientMedia(): HasManyThrough
+    {
+        return $this->hasManyThrough(ClientMedia::class, Client::class);
     }
 }

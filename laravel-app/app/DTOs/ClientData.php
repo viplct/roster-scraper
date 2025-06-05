@@ -9,7 +9,7 @@ readonly class ClientData
         public string $feedback,
         public ?string $jobTitle,
         public ?string $introduction = null,
-        public ?string $imageUrl = null
+        public ?string $photoUrl = null
     ) {}
 
     public function toArray(): array
@@ -19,7 +19,7 @@ readonly class ClientData
             'job_title' => $this->jobTitle,
             'introduction' => $this->introduction,
             'feedback' => $this->feedback,
-            'image_url' => $this->imageUrl,
+            'photo_url' => $this->photoUrl,
         ];
     }
 }

@@ -18,6 +18,7 @@ class Client extends Model
         'user_id',
         'name',
         'introduction',
+        'photo_url',
         'job_title',
         'feedback'
     ];

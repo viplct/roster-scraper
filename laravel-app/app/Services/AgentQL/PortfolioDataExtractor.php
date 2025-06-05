@@ -232,7 +232,7 @@ class PortfolioDataExtractor
                 introduction: $this->extractValue($client, [
                     'introduction', 'about'
                 ]),
-                imageUrl: $this->extractValue($client, [
+                photoUrl: $this->extractValue($client, [
                     'photo_url', 'image', 'image_url', 'photo', 'avatar', 'picture', 'logo'
                 ])
             );

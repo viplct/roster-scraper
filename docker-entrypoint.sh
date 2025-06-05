@@ -28,7 +28,8 @@ if [ ! -f "artisan" ]; then
     composer create-project laravel/laravel:^12.0 .
 fi
 
-# Install dependencies
+# Install PHP dependencies
+echo "Installing Composer dependencies..."
 composer install
 
 # Set directory permissions

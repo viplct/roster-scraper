@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SearchUsersRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserDetailsResource;
 use App\Services\UserService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
     public function __construct(
-        private readonly UserService $userPortfolioService
+        private readonly UserService $userService
     ) {}
 
     /**
@@ -23,7 +25,7 @@ class UserController extends Controller
     public function show(string $username): JsonResponse
     {
         try {
-            $user = $this->userPortfolioService->getUserDetails($username);
+            $user = $this->userService->getUserDetails($username);
 
             return response()->json([
                 'success' => true,
@@ -56,7 +58,7 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, string $username): JsonResponse
     {
         try {
-            $user = $this->userPortfolioService->updateUser($username, $request->validated());
+            $user = $this->userService->updateUser($username, $request->validated());
 
             return response()->json([
                 'success' => true,
@@ -88,7 +90,7 @@ class UserController extends Controller
     public function destroy(string $username): JsonResponse
     {
         try {
-            $this->userPortfolioService->deleteUser($username);
+            $this->userService->deleteUser($username);
 
             return response()->json([
                 'success' => true,
@@ -106,6 +108,35 @@ class UserController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete user',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Search users based on semantic search query
+     *
+     * @param SearchUsersRequest $request
+     * @return JsonResponse
+     */
+    public function search(SearchUsersRequest $request): JsonResponse
+    {
+        try {
+            // Simple semantic search
+            $users = $this->userService->searchUsers($request->get('q'));
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'users' => UserDetailsResource::collection($users),
+                    'count' => $users->count()
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Search failed',
                 'error' => $e->getMessage()
             ], 500);
         }

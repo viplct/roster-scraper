@@ -2,17 +2,16 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Scout\Searchable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Searchable;
 
     /**
      * The attributes that are mass assignable.
@@ -79,5 +78,45 @@ class User extends Authenticatable
     public function clientMedia(): HasManyThrough
     {
         return $this->hasManyThrough(ClientMedia::class, Client::class);
+    }
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSearchableArray(): array
+    {
+        // Load clients relationship for search context
+        $this->loadMissing(['clients']);
+
+        return [
+            'id' => (string)$this->id,
+            'name' => $this->name ?: '',
+            'username' => $this->username ?: '',
+            'job_title' => $this->job_title ?: '',
+            'bio' => $this->bio ?: '',
+            'expertise' => $this->expertise ?: '',
+            'skills' => $this->skills ?: '',
+            'client_job_titles' => $this->clients->pluck('job_title')->filter()->implode(', '),
+            'created_at' => $this->created_at->timestamp,
+            'updated_at' => $this->updated_at->timestamp,
+        ];
+    }
+
+    /**
+     * Get the name of the index associated with the model.
+     */
+    public function searchableAs(): string
+    {
+        return 'users_index';
+    }
+
+    /**
+     * Modify the query used to retrieve models when making all of the models searchable.
+     */
+    protected function makeAllSearchableUsing($query)
+    {
+        return $query->with(['works', 'clients']);
     }
 }

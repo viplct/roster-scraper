@@ -72,4 +72,16 @@ class UserService
 
         return $user->delete();
     }
+
+    /**
+     * Search users by query using semantic search
+     *
+     * @param string $query
+     * @param int $limit
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function searchUsers(string $query, int $limit = 20): \Illuminate\Database\Eloquent\Collection
+    {
+        return User::search($query)->take($limit)->get();
+    }
 }

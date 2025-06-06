@@ -4,7 +4,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     container_name: laravel_app
     restart: unless-stopped
     working_dir: /var/www/laravel-app
@@ -12,6 +12,7 @@ services:
       - ./laravel-app:/var/www/laravel-app
     depends_on:
       - db
+      - typesense
     networks:
       - laravel_network
 
@@ -26,6 +27,19 @@ services:
       - ./nginx/conf.d/:/etc/nginx/conf.d/
     depends_on:
       - app
+    networks:
+      - laravel_network
+
+  typesense:
+    image: typesense/typesense:28.0
+    restart: on-failure
+    ports:
+      - "8108:8108"
+    volumes:
+      - ./typesense-data:/data
+    environment:
+      - TYPESENSE_API_KEY=${TYPESENSE_API_KEY:-xyz}
+    command: '--data-dir /data --api-key=${TYPESENSE_API_KEY:-xyz} --enable-cors'
     networks:
       - laravel_network
 

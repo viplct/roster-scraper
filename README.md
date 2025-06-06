@@ -43,7 +43,6 @@ A Laravel-based user portfolio management system with semantic search capabiliti
     ```
 
 6. **Access the application**
-    - **API**: http://localhost:8080/api
     - **API Documentation**: http://localhost:8080/swagger
 
 ### Environment Configuration
@@ -220,31 +219,31 @@ The extracted data is then processed and stored in the database:
 
 | Method | Endpoint | Description | Authentication |
 |--------|----------|-------------|----------------|
-| GET | `/api/users/{username}` | Get user portfolio details | None |
-| PATCH | `/api/users/{username}` | Update user with nested resources | None |
-| DELETE | `/api/users/{username}` | Delete user account | None |
+| GET | `/api/v1/users/{username}` | Get user portfolio details | None |
+| PATCH | `/api/v1/users/{username}` | Update user with nested resources | None |
+| DELETE | `/api/v1/users/{username}` | Delete user account | None |
 
 ### Search
 
 | Method | Endpoint | Description | Parameters |
 |--------|----------|-------------|------------|
-| GET | `/api/users?q={query}` | Semantic search users | `q` (string, min: 6, max: 255) |
+| GET | `/api/v1/users?q={query}` | Semantic search users | `q` (string, min: 6, max: 255) |
 
 ### Example API Usage
 
 **Search Users:**
 ```bash
-curl "http://localhost:8080/api/users?q=video%20editor%20with%205%20years%20experience"
+curl "http://localhost:8080/api/v1/users?q=video%20editor%20with%205%20years%20experience"
 ```
 
 **Get User Details:**
 ```bash
-curl "http://localhost:8080/api/users/sonu"
+curl "http://localhost:8080/api/v1/users/sonu"
 ```
 
 **Update User (with nested resources):**
 ```bash
-curl -X PATCH "http://localhost:8080/api/users/sonu" \
+curl -X PATCH "http://localhost:8080/api/v1/users/sonu" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Updated Name",
@@ -541,11 +540,11 @@ When searching for "video editor with 5 years experience", a match in the `job_t
 
 ### API Design
 
-- **Separated Update Endpoints**: Currently, the Update User API (`PATCH /api/users/{username}`) performs bulk updates for users, works, and clients in a single request. Consider separating this into dedicated endpoints:
-  - `PATCH /api/users/{username}` - Update user profile only
-  - `POST /api/users/{username}/works` - Add new work
-  - `PATCH /api/users/{username}/works/{id}` - Update specific work
-  - `DELETE /api/users/{username}/works/{id}` - Delete work
+- **Separated Update Endpoints**: Currently, the Update User API (`PATCH /api/v1/users/{username}`) performs bulk updates for users, works, and clients in a single request. Consider separating this into dedicated endpoints:
+  - `PATCH /api/v1/users/{username}` - Update user profile only
+  - `POST /api/v1/users/{username}/works` - Add new work
+  - `PATCH /api/v1/users/{username}/works/{id}` - Update specific work
+  - `DELETE /api/v1/users/{username}/works/{id}` - Delete work
   - Similar endpoints for clients and media
   
   This approach would:

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\AgentQL;
 
 use App\Clients\AgentQLHttpClient;
@@ -37,35 +39,35 @@ class PortfolioDataExtractor
      */
     private function getComprehensivePortfolioPrompt(): string
     {
-        return "Extract all information from this portfolio page including:
+        return "Extract all information from this portfolio page including, all the keys returned should be in snake_case format:
 
-        **PORTFOLIO OWNER/TALENT INFORMATION:**
-        - Name of the portfolio owner/talent
-        - Job title, profession, or role (e.g., 'Video Editor', 'Graphic Designer')
-        - About me section, introduction, or bio text
-        - Areas of expertise, specializations, or what they're good at
-        - Skills, proficiency, technical abilities, software knowledge, or experience details
-        - Social media URLs (Instagram, LinkedIn, Twitter, YouTube, etc.)
-
-        **PORTFOLIO WORKS:**
-        - All portfolio work items including videos, images, projects
-        - YouTube videos, Vimeo videos, embedded videos
-        - Image galleries and portfolio images
-        - Project showcases and case studies
-        For each work item: title/name, URL/link, description/caption
-
-        **CLIENT INFORMATION (if available):**
-        - Client feedback, reviews, testimonials, or case studies
-        - Customer quotes, recommendations, or project details
-        - Client work examples or collaborations
-
-        For each client, get:
-        - Client name
-        - Client job title, position, or company
-        - Client feedback, testimonial text, or project description
-        - Client photo or company logo URL if available
-
-        Focus on actual content, not navigation elements. If client information doesn't exist, that's okay - just extract owner info and works.";
+            **PORTFOLIO OWNER/TALENT INFORMATION:**
+            - Name of the portfolio owner/talent
+            - Job title, profession, or role (e.g., 'Video Editor', 'Graphic Designer')
+            - About me section, introduction, or bio text
+            - Areas of expertise, specializations, or what they're good at
+            - Skills, proficiency, technical abilities, software knowledge, or experience details
+            - Social media URLs (Instagram, LinkedIn, Twitter, YouTube, etc.)
+    
+            **PORTFOLIO WORKS:**
+            - All portfolio work items including videos, images, projects
+            - YouTube videos, Vimeo videos, embedded videos
+            - Image galleries and portfolio images
+            - Project showcases and case studies
+            For each work item: title/name, URL/link, description/caption
+    
+            **CLIENTS (if available):**
+            - Client feedback, reviews, testimonials, or case studies
+            - Customer quotes, recommendations, or project details
+            - Client work examples or collaborations
+    
+            For each client, get:
+            - name
+            - job title, position, or company
+            - feedback, testimonial text, or project description
+            - photo or company logo URL if available
+    
+            Focus on actual content, not navigation elements. If client information doesn't exist, that's okay - just extract owner info and works.";
     }
 
     /**
@@ -100,7 +102,7 @@ class PortfolioDataExtractor
     {
         // Look for owner/talent information in various keys
         $ownerData = $this->extractObjectFromResponse($rawData, [
-            'portfolio_owner', 'owner', 'talent', 'profile', 'person', 'author', 'creator'
+            'portfolio_owner', 'portfolio_owner_information', 'owner', 'talent', 'profile', 'person', 'author', 'creator'
         ]) ?: $rawData;
 
         $name = $this->extractValue($ownerData, [
@@ -209,7 +211,7 @@ class PortfolioDataExtractor
     private function transformClientsData(array $rawData): array
     {
         $clients = $this->extractArrayFromResponse($rawData, [
-            'clients', 'reviews', 'feedback', 'customers', 'collaborations'
+            'clients', 'reviews', 'feedback', 'customers', 'collaborations', 'portfolio_clients'
         ]);
 
         $validClients = array_map(function ($client) {

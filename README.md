@@ -58,8 +58,6 @@ TYPESENSE_API_KEY=your-typesense-api-key
 SCOUT_DRIVER=typesense
 ```
 
----
-
 ## 🏗️ System Architecture
 
 ### High-Level Architecture
@@ -75,7 +73,8 @@ SCOUT_DRIVER=typesense
 
 ### Component Overview
 
-1. **Laravel API Layer**
+1. **Laravel Application Layer**
+   - Artisan commands for portfolio import (using AgentQL)
    - RESTful API endpoints for CRUD operations
    - Request validation using Form Requests
    - Service layer for business logic
@@ -94,7 +93,126 @@ SCOUT_DRIVER=typesense
    - Artisan commands for data import and management (Sonu's portfolio)
    - Structured user data with works, clients, and media
 
----
+## 🤖 Portfolio Import System
+
+### Overview
+
+The system includes a powerful Artisan command that can automatically extract and import talent portfolio data from web sources using AgentQL integration. This allows for seamless onboarding of new talent by simply providing their portfolio URL.
+
+### Command Usage
+
+```bash
+php artisan portfolio:import {username} {portfolio_url}
+```
+
+**Example:**
+```bash
+docker-compose exec app php artisan portfolio:import sonu https://sonuchoudhary.my.canva.site/portfolio
+```
+
+### How It Works
+
+#### 1. **AgentQL Integration**
+The command leverages AgentQL, an AI-powered web scraping service, to intelligently extract structured data from portfolio websites. Unlike traditional web scraping that relies on fixed selectors, AgentQL uses natural language processing to understand the content and structure of web pages.
+
+#### 2. **Data Extraction Process**
+- **URL Input**: The command receives the portfolio URL from the user
+
+- **Prompt Engineering**: The system uses the `PortfolioDataExtractor` class to provide AgentQL with a carefully crafted prompt that specifies exactly what information to extract
+
+- **AgentQL Processing**: AgentQL processes the URL using our prompt to extract the requested portfolio information
+
+- **Structured Response**: AgentQL returns the extracted data in a structured format based on our prompt specifications
+
+
+### AgentQL Prompt Structure
+
+The system uses a comprehensive natural language prompt in the `PortfolioDataExtractor` class to guide AgentQL on what information to extract:
+
+```text
+Extract all information from this portfolio page including, all the keys returned should be in snake_case format:
+
+**PORTFOLIO OWNER/TALENT INFORMATION:**
+- Name of the portfolio owner/talent
+- Job title, profession, or role (e.g., 'Video Editor', 'Graphic Designer')
+- About me section, introduction, or bio text
+- Areas of expertise, specializations, or what they're good at
+- Skills, proficiency, technical abilities, software knowledge, or experience details
+- Social media URLs (Instagram, LinkedIn, Twitter, YouTube, etc.)
+
+**PORTFOLIO WORKS:**
+- All portfolio work items including videos, images, projects
+- YouTube videos, Vimeo videos, embedded videos
+- Image galleries and portfolio images
+- Project showcases and case studies
+For each work item: title/name, URL/link, description/caption
+
+**CLIENTS (if available):**
+- Client feedback, reviews, testimonials, or case studies
+- Customer quotes, recommendations, or project details
+- Client work examples or collaborations
+
+For each client, get:
+- name
+- job title, position, or company
+- feedback, testimonial text, or project description
+- photo or company logo URL if available
+
+Focus on actual content, not navigation elements. If client information doesn't exist, that's okay - just extract owner info and works.
+```
+
+This prompt ensures AgentQL extracts comprehensive portfolio data in a structured format that can be directly processed by the application.
+
+### AgentQL Response Structure
+
+With the provided prompt above, AgentQL returned a response which should have the below structure:
+
+```javascript
+// Example AgentQL query structure
+{
+  portfolio_owner: {
+    name: "Extract the person's full name",
+    job_title: "Find the main professional title or role",
+    bio: "Extract the biographical information or about section",
+    skills: "List all mentioned skills and competencies",
+    expertise: "Identify areas of expertise and specialization",
+    social_media_urls: "List of social media accounts that the owner included in the page"
+  }
+  works: [{
+    title: "Extract work/project titles",
+    description: "Get project descriptions",
+    url: "Find project URLs or links"
+  }],
+  clients: [{
+    name: "Extract client names from testimonials",
+    job_title: "Get client's job title or position",
+    feedback: "Extract testimonial or feedback text",
+    photo_url: "Find client photo if available"
+  }]
+}
+```
+
+#### 3. **Database Population**
+The extracted data is then processed and stored in the database:
+- **User Profile**: Basic information, bio, skills, expertise
+- **Work Samples**: Portfolio pieces with titles, descriptions, and URLs
+- **Client Testimonials**: Client feedback, photos, and project details
+- **Media Assets**: Associated images and videos from the portfolio
+
+### Error Handling & Validation
+
+- **URL Validation**: Ensures the provided URL is accessible and valid
+- **Data Validation**: Validates extracted data against database constraints
+- **Duplicate Prevention**: Checks for existing users before import
+- **Graceful Failures**: Provides clear error messages for debugging
+- **Partial Import**: Continues with available data even if some fields fail extraction
+
+### Limitations & Considerations
+
+- **Website Structure Dependency**: Performance may vary based on portfolio website design
+- **Rate Limiting**: AgentQL API calls are subject to rate limiting
+- **Content Quality**: Extraction accuracy depends on the quality and structure of source content
+- **Manual Review**: Imported data may require manual review for accuracy
 
 ## 🔗 API Endpoints
 
@@ -141,8 +259,6 @@ curl -X PATCH "http://localhost:8080/api/users/sonu" \
 ```
 
 For complete API documentation with examples, visit: http://localhost:8080/swagger
-
----
 
 ## 🗄️ Database Structure
 
@@ -241,8 +357,6 @@ User::whereIn('id', $userIds)
     });
 ```
 
----
-
 ## 📈 Scalability Considerations
 
 ### Current Architecture Scalability
@@ -268,8 +382,6 @@ User::whereIn('id', $userIds)
 - **Search**: Index size, query response times
 - **API**: Response times, error rates
 - **Infrastructure**: CPU, memory, disk I/O
-
----
 
 ## 🔍 Semantic Search System Design
 
@@ -394,8 +506,6 @@ The search system uses weighted field matching to prioritize relevance. Higher w
 - **username** (weight: 2) - Account identifier
 
 When searching for "video editor with 5 years experience", a match in the `job_title` field will score 3x higher than a match in the `username` field, ensuring more relevant results appear first.
-
----
 
 ## 🚧 Future Improvements
 

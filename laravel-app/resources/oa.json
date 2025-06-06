@@ -1,0 +1,698 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Roster Scraper API",
+        "version": "1.0.0",
+        "description": "User Portfolio Management and Search API",
+        "contact": {},
+        "termsOfService": "http://localhost"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080/api",
+            "description": "Local development server"
+        }
+    ],
+    "paths": {
+        "/users": {
+            "get": {
+                "tags": ["Users"],
+                "summary": "Search users",
+                "description": "Search users using semantic search with natural language queries",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "required": true,
+                        "description": "Search query (minimum 6 characters)",
+                        "schema": {
+                            "type": "string",
+                            "minLength": 6,
+                            "maxLength": 255,
+                            "example": "a video editor with 5 years of experience editing YouTube videos for doctors"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Search results",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "users": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/UserDetail"
+                                                    }
+                                                },
+                                                "count": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Search failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{username}": {
+            "get": {
+                "tags": ["Users"],
+                "summary": "Get user details",
+                "description": "Retrieve user portfolio data by username",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "path",
+                        "required": true,
+                        "description": "User's username",
+                        "schema": {
+                            "type": "string",
+                            "example": "sonu"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User details retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "response": {
+                                            "$ref": "#/components/schemas/UserDetail"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": ["Users"],
+                "summary": "Update user",
+                "description": "Update user data including works and clients",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "path",
+                        "required": true,
+                        "description": "User's username",
+                        "schema": {
+                            "type": "string",
+                            "example": "sonu"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateUserRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "response": {
+                                            "$ref": "#/components/schemas/UserDetail"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Users"],
+                "summary": "Delete user",
+                "description": "Delete user by username",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "path",
+                        "required": true,
+                        "description": "User's username",
+                        "schema": {
+                            "type": "string",
+                            "example": "sonu"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User deleted successfully"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "UserDetail": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "SONU CHOUDHARY"
+                    },
+                    "username": {
+                        "type": "string",
+                        "example": "sonu"
+                    },
+                    "job_title": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "Video Editor"
+                    },
+                    "bio": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "I specialize in YouTube video editing, crafting high-quality content..."
+                    },
+                    "expertise": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "shorts form contents, taking head videos, storytelling, branding, motion graphics"
+                    },
+                    "skills": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "using industry level software like adobe premiere pro & aftereffects, 5+ years of experience in editing field"
+                    },
+                    "social_urls": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true,
+                        "example": [
+                            "https://wa.me/+917563910757",
+                            "https://www.linkedin.com/in/sonuchoudharyprofile/"
+                        ]
+                    },
+                    "works": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Work"
+                        }
+                    },
+                    "clients": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Client"
+                        }
+                    }
+                }
+            },
+            "Work": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Why winning the most votes doesn't mean victory."
+                    },
+                    "url": {
+                        "type": "string",
+                        "example": "https://www.youtube.com/shorts/6XXOd910vWc"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "Short video explaining electoral systems"
+                    }
+                }
+            },
+            "Client": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Dr Maryam Seddigh"
+                    },
+                    "job_title": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "Doctor & Content Creator"
+                    },
+                    "introduction": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "Leading medical professional..."
+                    },
+                    "feedback": {
+                        "type": "string",
+                        "example": "Sonu is a high-caliber editor. His eye for detail, creativity, and storytelling skills..."
+                    },
+                    "photo_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "https://sonuchoudhary.my.canva.site/portfolio/_assets/media/fa887ab55d940712fd8572b938ae74c7.jpg"
+                    },
+                    "media": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ClientMedia"
+                        }
+                    }
+                }
+            },
+            "ClientMedia": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": ["image", "video"],
+                        "example": "image"
+                    },
+                    "url": {
+                        "type": "string",
+                        "example": "https://example.com/media/image.jpg"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "Project screenshot"
+                    }
+                }
+            },
+            "UpdateUserRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "job_title": {
+                        "type": "string",
+                        "example": "Video Editor"
+                    },
+                    "bio": {
+                        "type": "string",
+                        "example": "Experienced video editor..."
+                    },
+                    "expertise": {
+                        "type": "string",
+                        "example": "video editing, motion graphics"
+                    },
+                    "skills": {
+                        "type": "string",
+                        "example": "Adobe Premiere Pro, After Effects"
+                    },
+                    "social_urls": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "https://linkedin.com/in/johndoe"
+                        ]
+                    },
+                    "works": {
+                        "type": "array",
+                        "description": "Array of work items. Include 'id' to update existing work, omit 'id' to create new work, add '_delete: true' to delete existing work.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer",
+                                    "description": "Include ID to update existing work, omit to create new work"
+                                },
+                                "title": {
+                                    "type": "string",
+                                    "example": "Video Project"
+                                },
+                                "url": {
+                                    "type": "string",
+                                    "example": "https://youtube.com/watch?v=example"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "example": "Project description"
+                                },
+                                "_delete": {
+                                    "type": "boolean",
+                                    "description": "Set to true to delete this work",
+                                    "example": false
+                                }
+                            }
+                        },
+                        "example": [
+                            {
+                                "id": 1,
+                                "title": "Updated Video Project",
+                                "url": "https://youtube.com/watch?v=updated",
+                                "description": "Updated project description"
+                            },
+                            {
+                                "title": "New Video Project",
+                                "url": "https://youtube.com/watch?v=new",
+                                "description": "New project without ID - will be created"
+                            },
+                            {
+                                "id": 2,
+                                "_delete": true
+                            }
+                        ]
+                    },
+                    "clients": {
+                        "type": "array",
+                        "description": "Array of client items. Include 'id' to update existing client, omit 'id' to create new client, add '_delete: true' to delete existing client.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer",
+                                    "description": "Include ID to update existing client, omit to create new client"
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "example": "Client Name"
+                                },
+                                "job_title": {
+                                    "type": "string",
+                                    "example": "CEO"
+                                },
+                                "introduction": {
+                                    "type": "string",
+                                    "example": "Client introduction"
+                                },
+                                "feedback": {
+                                    "type": "string",
+                                    "example": "Great work!"
+                                },
+                                "photo_url": {
+                                    "type": "string",
+                                    "example": "https://example.com/photo.jpg"
+                                },
+                                "_delete": {
+                                    "type": "boolean",
+                                    "description": "Set to true to delete this client",
+                                    "example": false
+                                },
+                                "media": {
+                                    "type": "array",
+                                    "description": "Array of media items. Include 'id' to update existing media, omit 'id' to create new media, add '_delete: true' to delete existing media.",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "description": "Include ID to update existing media, omit to create new media"
+                                            },
+                                            "type": {
+                                                "type": "string",
+                                                "enum": ["image", "video"],
+                                                "example": "image"
+                                            },
+                                            "url": {
+                                                "type": "string",
+                                                "example": "https://example.com/media.jpg"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "example": "Media description"
+                                            },
+                                            "_delete": {
+                                                "type": "boolean",
+                                                "description": "Set to true to delete this media",
+                                                "example": false
+                                            }
+                                        }
+                                    },
+                                    "example": [
+                                        {
+                                            "id": 1,
+                                            "type": "image",
+                                            "url": "https://example.com/updated-media.jpg",
+                                            "description": "Updated media description"
+                                        },
+                                        {
+                                            "type": "video",
+                                            "url": "https://example.com/new-video.mp4",
+                                            "description": "New media without ID - will be created"
+                                        },
+                                        {
+                                            "id": 2,
+                                            "_delete": true
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "example": [
+                            {
+                                "id": 1,
+                                "name": "Updated Client Name",
+                                "job_title": "Updated CEO",
+                                "introduction": "Updated client introduction",
+                                "feedback": "Updated feedback!",
+                                "photo_url": "https://example.com/updated-photo.jpg"
+                            },
+                            {
+                                "name": "New Client Name",
+                                "job_title": "New CEO",
+                                "introduction": "New client without ID - will be created",
+                                "feedback": "New client feedback!",
+                                "photo_url": "https://example.com/new-photo.jpg"
+                            },
+                            {
+                                "id": 2,
+                                "_delete": true
+                            }
+                        ]
+                    }
+                },
+                "example": {
+                    "name": "John Doe",
+                    "job_title": "Senior Video Editor",
+                    "bio": "Experienced video editor with 10+ years in the industry...",
+                    "expertise": "video editing, motion graphics, color grading",
+                    "skills": "Adobe Premiere Pro, After Effects, DaVinci Resolve",
+                    "social_urls": [
+                        "https://linkedin.com/in/johndoe",
+                        "https://twitter.com/johndoe"
+                    ],
+                    "works": [
+                        {
+                            "id": 1,
+                            "title": "Updated Video Project",
+                            "url": "https://youtube.com/watch?v=updated",
+                            "description": "This work will be updated (has ID)"
+                        },
+                        {
+                            "title": "New Video Project",
+                            "url": "https://youtube.com/watch?v=new",
+                            "description": "This work will be created (no ID)"
+                        },
+                        {
+                            "id": 3,
+                            "_delete": true
+                        }
+                    ],
+                    "clients": [
+                        {
+                            "id": 1,
+                            "name": "Updated Client",
+                            "job_title": "CEO",
+                            "introduction": "This client will be updated (has ID)",
+                            "feedback": "Excellent work!",
+                            "photo_url": "https://example.com/client.jpg"
+                        },
+                        {
+                            "name": "New Client",
+                            "job_title": "Director",
+                            "introduction": "This client will be created (no ID)",
+                            "feedback": "Great collaboration!",
+                            "photo_url": "https://example.com/new-client.jpg"
+                        }
+                    ]
+                }
+            },
+            "ValidationError": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "The given data was invalid."
+                    },
+                    "errors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": {
+                            "q": ["Search query is required."]
+                        }
+                    }
+                }
+            },
+            "NotFoundError": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "User not found"
+                    },
+                    "error": {
+                        "type": "string",
+                        "example": "User with username 'sonu' does not exist"
+                    }
+                }
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Search failed"
+                    },
+                    "error": {
+                        "type": "string",
+                        "example": "Connection to search engine failed"
+                    }
+                }
+            }
+        }
+    }
+}

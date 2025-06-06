@@ -24,7 +24,7 @@ services:
       - "8080:80"
     volumes:
       - ./laravel-app:/var/www/laravel-app
-      - ./nginx/conf.d/:/etc/nginx/conf.d/
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
     depends_on:
       - app
     networks:
